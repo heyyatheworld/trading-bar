@@ -7,8 +7,9 @@ A lightweight native macOS application that tracks global trading sessions direc
 ## ✨ Features
 
 * **Minimalist UI:** Displays only in the top menu bar (Status Bar)
-* **Smart Tracking:** Automatically detects the current trading session (London, New York, Tokyo, and more)
-* **CME Gap Alert:** Indicates volatility risks when markets open
+* **Smart Tracking:** Automatically detects the current trading session (Hong Kong, Frankfurt/XETRA, London, NYSE pre/main, CME)
+* **CME Gap Alert:** Indicates volatility risks when markets open (weekends and Monday pre-open)
+* **BTC/ETH Premium:** Spot prices from Coinbase and premium vs Binance in the menu
 * **Low Resource Usage:** Built with Python using native macOS libraries (PyObjC)
 
 ---
@@ -19,9 +20,11 @@ The application uses the `zoneinfo` library (Python 3.9+ standard) for correct h
 
 **Main tracked sessions:**
 
-* **Asia (Tokyo):** 00:00 — 09:00 UTC
-* **Europe (London):** 08:00 — 17:00 UTC
-* **America (New York):** 13:00 — 22:00 UTC
+* **HKEX (Hong Kong)** — Asia/Hong_Kong
+* **XETRA (Frankfurt)** — Europe/Berlin
+* **LSE (London)** — Europe/London
+* **NYSE (New York)** — pre-market and main session, America/New_York
+* **CME (Chicago)** — futures session, America/Chicago (with weekend wrap logic)
 
 > **Note:** The application automatically matches your Mac's system time with the configured exchange time zones, ensuring accurate display.
 
