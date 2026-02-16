@@ -1,73 +1,100 @@
 # 📊 Crypto Session Bar
 
-Легкое нативное приложение для macOS, которое отслеживает торговые сессии мировых бирж прямо в вашем **Menu Bar**. Актуальная информация о рынках всегда перед глазами без лишних окон.
+A lightweight native macOS application that tracks global trading sessions directly in your **Menu Bar**. Keep market information at your fingertips without cluttering your screen.
 
 ---
 
-## ✨ Особенности
-* **Minimalist UI:** Отображается только в верхней панели (Status Bar).
-* **Smart Tracking:** Автоматическое определение текущей сессии (Лондон, Нью-Йорк, Токио и др.).
-* **CME Gap Alert:** Индикация рисков волатильности при открытии рынков.
-* **Low Resource:** Написано на Python с использованием нативных библиотек macOS (PyObjC).
+## ✨ Features
+
+* **Minimalist UI:** Displays only in the top menu bar (Status Bar)
+* **Smart Tracking:** Automatically detects the current trading session (London, New York, Tokyo, and more)
+* **CME Gap Alert:** Indicates volatility risks when markets open
+* **Low Resource Usage:** Built with Python using native macOS libraries (PyObjC)
 
 ---
 
-## 🌍 Работа с часовыми поясами
+## 🌍 Time Zone Handling
 
-Приложение использует библиотеку `zoneinfo` (стандарт Python 3.9+) для корректной обработки переходов на летнее/зимнее время. Это критически важно для трейдинга, так как время открытия бирж относительно UTC меняется дважды в год.
+The application uses the `zoneinfo` library (Python 3.9+ standard) for correct handling of daylight saving time transitions. This is critical for trading, as exchange opening times relative to UTC change twice a year.
 
-**Основные отслеживаемые сессии:**
+**Main tracked sessions:**
+
 * **Asia (Tokyo):** 00:00 — 09:00 UTC
 * **Europe (London):** 08:00 — 17:00 UTC
 * **America (New York):** 13:00 — 22:00 UTC
 
-> **Примечание:** Приложение автоматически сопоставляет системное время вашего Mac с настроенными часовыми поясами бирж, гарантируя точность отображения.
+> **Note:** The application automatically matches your Mac's system time with the configured exchange time zones, ensuring accurate display.
 
 ---
 
-## 🛠 Разработка и запуск из исходников
+## 🛠 Development & Running from Source
 
-### Требования
-* macOS (Intel или Apple Silicon)
-* Python 3.12 (рекомендуемая версия для стабильной сборки)
+### Requirements
 
-### Настройка окружения
+* macOS (Intel or Apple Silicon)
+* Python 3.12 (recommended version for stable builds)
+
+### Environment Setup
+
 ```bash
-# Клонируйте репозиторий
-git clone [https://github.com/yourusername/trading-bar.git](https://github.com/yourusername/trading-bar.git)
+# Clone the repository
+git clone https://github.com/yourusername/trading-bar.git
 cd trading-bar
 
-# Создайте виртуальное окружение
+# Create a virtual environment
 python3.12 -m venv .venv
 source .venv/bin/activate
 
-# Установите зависимости
+# Install dependencies
 pip install pyobjc requests
+```
 
-📦 Сборка собственного .app файла
-Для создания автономного приложения используется PyInstaller, так как он наиболее корректно упаковывает зависимости в новых версиях macOS (включая Sonoma и Sequoia).
+---
 
-1. Подготовка прав доступа
-Если при сборке возникает ошибка Operation not permitted, необходимо дать Терминалу доступ к диску:
-System Settings -> Privacy & Security -> Full Disk Access -> Включить Terminal.
+## 📦 Building Your Own .app File
 
-2. Команда сборки
-Выполните следующую команду в корне проекта:
+To create a standalone application, PyInstaller is used as it most correctly packages dependencies in newer macOS versions (including Sonoma and Sequoia).
 
-Bash
+### 1. Prepare Access Permissions
+
+If you encounter an "Operation not permitted" error during build, you need to grant Terminal full disk access:
+
+> **System Settings → Privacy & Security → Full Disk Access → Enable Terminal**
+
+### 2. Build Command
+
+Execute the following command in the project root:
+
+```bash
 pip install pyinstaller
-pyinstaller --noconsole --windowed --onefile --hidden-import=zoneinfo --name "CryptoBar" main.py
---noconsole и --windowed: Приложение не будет открывать лишнее окно терминала.
---onefile: Все зависимости упаковываются внутрь одного исполняемого файла.
---hidden-import=zoneinfo: Принудительное включение базы часовых поясов.
-3. Установка
-После завершения процесса:
-Зайдите в появившуюся папку dist/.
-Перетащите CryptoBar.app в системную папку Applications (Программы).
-⚙️ Настройка автозапуска
-Чтобы приложение запускалось автоматически при старте системы:
-Перейдите в System Settings -> General -> Login Items.
-В секции "Open at Login" нажмите кнопку «+».
-Выберите CryptoBar.app из папки Программы.
-📝 Лицензия
-MIT License. Используйте в любых целях. Удачных торгов!
+pyinstaller --noconsole --windowed --onefile --hidden-import=zoneinfo --name "TradingBar" main.py
+```
+
+#### Build Options Explained
+
+* `--noconsole` and `--windowed`: The application won't open an extra terminal window
+* `--onefile`: All dependencies are packaged into a single executable file
+* `--hidden-import=zoneinfo`: Forces inclusion of the timezone database
+
+### 3. Installation
+
+After the build process completes:
+
+1. Navigate to the `dist/` folder
+2. Drag `TradingBar.app` to your `Applications` folder
+
+---
+
+## ⚙️ Auto-Start Configuration
+
+To make the application launch automatically at system startup:
+
+1. Go to **System Settings → General → Login Items**
+2. In the "Open at Login" section, click the **+** button
+3. Select `TradingBar.app` from your Applications folder
+
+---
+
+## 📝 License
+
+MIT License. Use for any purpose. Happy trading!

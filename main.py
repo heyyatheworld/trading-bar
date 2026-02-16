@@ -1,6 +1,6 @@
-import sys
 import os
 import objc
+import requests
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from AppKit import (NSApplication, NSStatusBar, NSVariableStatusItemLength, 
@@ -30,7 +30,7 @@ class CryptoMasterSessionsApp(NSObject):
     def applicationDidFinishLaunching_(self, notification):
         NSApp.setActivationPolicy_(NSApplicationActivationPolicyProhibited)
         self.timer = NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(
-            10.0, self, "updateUI:", None, True
+            60.0, self, "updateUI:", None, True
         )
         self.updateUI_(None)
 
@@ -74,6 +74,46 @@ class CryptoMasterSessionsApp(NSObject):
         attr_title = NSAttributedString.alloc().initWithString_attributes_(title, {"NSFont": font})
         item.setAttributedTitle_(attr_title)
         return item
+
+    @objc.python_method
+    def calculate_premium_btc(self):
+        try:
+            cb_res = requests.get("https://api.exchange.coinbase.com/products/BTC-USD/ticker", timeout=5).json()
+            price_cb = float(cb_res['price'])
+
+            bn_res = requests.get("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT", timeout=5).json()
+            price_bn = float(bn_res['price'])
+
+            premium_amount = price_cb - price_bn
+            premium_percentage = ((premium_amount) / price_bn) * 100
+            
+            # Sound alert when deviation is 0.1% or more
+            if abs(premium_percentage) >= 0.1:
+                NSSound.soundNamed_("Basso").play()
+                
+            return premium_amount, premium_percentage
+        except (requests.RequestException, KeyError, ValueError):
+            return 0, 0
+
+    @objc.python_method
+    def calculate_premium_eth(self):
+        try:
+            cb_res = requests.get("https://api.exchange.coinbase.com/products/ETH-USD/ticker", timeout=5).json()
+            price_cb = float(cb_res['price'])
+
+            bn_res = requests.get("https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT", timeout=5).json()
+            price_bn = float(bn_res['price'])
+
+            premium_amount = price_cb - price_bn
+            premium_percentage = ((premium_amount) / price_bn) * 100
+            
+            # Sound alert when deviation is 0.1% or more
+            if abs(premium_percentage) >= 0.1:
+                NSSound.soundNamed_("Basso").play()
+                
+            return premium_amount, premium_percentage
+        except (requests.RequestException, KeyError, ValueError):
+            return 0, 0
 
     def updateUI_(self, _):
         active_codes = []
@@ -127,7 +167,9 @@ class CryptoMasterSessionsApp(NSObject):
                 
                 menu_title = f"{s['mkt']} {s['icon']} {now.strftime('%H:%M')} » {status_str}"
                 new_menu.addItem_(self.create_menu_item(menu_title, is_active=is_active))
-            except Exception: pass
+            except (KeyError, ValueError):
+                # Skip invalid session configuration
+                pass
 
         if show_gap_risk:
             new_menu.addItem_(NSMenuItem.separatorItem())
@@ -136,6 +178,21 @@ class CryptoMasterSessionsApp(NSObject):
         if len(active_codes) > self.last_active_count:
             NSSound.soundNamed_("Glass").play()
         self.last_active_count = len(active_codes)
+
+        premium_amount_btc, premium_percentage_btc = self.calculate_premium_btc()
+        premium_amount_eth, premium_percentage_eth = self.calculate_premium_eth()
+        
+        # Display BTC premium if available
+        if premium_amount_btc != 0 or premium_percentage_btc != 0:
+            color = "🟢" if premium_amount_btc > 0 else "🔴"
+            premium_str = f"BTC Prem: {color} {premium_amount_btc:.4f} ({premium_percentage_btc:.2f}%)"
+            new_menu.addItem_(self.create_menu_item(premium_str, is_active=True))
+
+        # Display ETH premium if available
+        if premium_amount_eth != 0 or premium_percentage_eth != 0:
+            color = "🟢" if premium_amount_eth > 0 else "🔴"
+            premium_str = f"ETH Prem: {color} {premium_amount_eth:.4f} ({premium_percentage_eth:.2f}%)"
+            new_menu.addItem_(self.create_menu_item(premium_str, is_active=True))
 
         new_menu.addItem_(NSMenuItem.separatorItem())
         quit_item = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_("Quit App", "terminateApp:", "q")
@@ -147,9 +204,12 @@ class CryptoMasterSessionsApp(NSObject):
             prefix = "🔥 " if len(active_codes) >= 3 else ""
             self.status_item.button().setTitle_(f"{prefix}{' '.join(active_codes)}")
         else:
-            upcoming.sort()
-            next_m, next_id = upcoming[0]
-            self.status_item.button().setTitle_(f"💤 {next_id}: {next_m//60}h {next_m%60}m")
+            if upcoming:
+                upcoming.sort()
+                next_m, next_id = upcoming[0]
+                self.status_item.button().setTitle_(f"💤 {next_id}: {next_m//60}h {next_m%60}m")
+            else:
+                self.status_item.button().setTitle_("💤 No sessions")
 
     @objc.typedSelector(b"v@:@")
     def dummyAction_(self, _): pass
@@ -162,3 +222,4 @@ if __name__ == "__main__":
     delegate = CryptoMasterSessionsApp.alloc().init()
     app.setDelegate_(delegate)
     AppHelper.runEventLoop()
+    
