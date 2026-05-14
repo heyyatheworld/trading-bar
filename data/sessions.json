@@ -1,0 +1,62 @@
+[
+  {
+    "id": "HKG",
+    "mkt": "HKEX ",
+    "type": "MAIN",
+    "tz": "Asia/Hong_Kong",
+    "open": 9,
+    "close": 18,
+    "icon": "🏮",
+    "venue": "exchange"
+  },
+  {
+    "id": "FRA",
+    "mkt": "XETRA",
+    "type": "MAIN",
+    "tz": "Europe/Berlin",
+    "open": 9,
+    "close": 17.5,
+    "icon": "🇩🇪",
+    "venue": "exchange"
+  },
+  {
+    "id": "LDN",
+    "mkt": "LSE  ",
+    "type": "MAIN",
+    "tz": "Europe/London",
+    "open": 8,
+    "close": 16,
+    "icon": "🔵",
+    "venue": "exchange"
+  },
+  {
+    "id": "NYC",
+    "mkt": "NYSE ",
+    "type": "PRE ",
+    "tz": "America/New_York",
+    "open": 4,
+    "close": 9.5,
+    "icon": "🌤️",
+    "venue": "exchange"
+  },
+  {
+    "id": "NYC",
+    "mkt": "NYSE ",
+    "type": "MAIN",
+    "tz": "America/New_York",
+    "open": 9.5,
+    "close": 16,
+    "icon": "🗽",
+    "venue": "exchange"
+  },
+  {
+    "id": "CHI",
+    "mkt": "CME  ",
+    "type": "CME ",
+    "tz": "America/Chicago",
+    "open": 17,
+    "close": 16,
+    "icon": "📊",
+    "venue": "cme"
+  }
+]

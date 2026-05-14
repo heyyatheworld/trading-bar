@@ -18,7 +18,7 @@ A lightweight native macOS application that tracks global trading sessions direc
 
 The application uses the `zoneinfo` library (Python 3.9+ standard) for correct handling of daylight saving time transitions. This is critical for trading, as exchange opening times relative to UTC change twice a year.
 
-**Main tracked sessions:**
+**Main tracked sessions** (editable in `data/sessions.json`; CME uses `"venue": "cme"`):
 
 * **HKEX (Hong Kong)** — Asia/Hong_Kong
 * **XETRA (Frankfurt)** — Europe/Berlin

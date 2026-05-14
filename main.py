@@ -12,6 +12,7 @@ from AppKit import (NSApplication, NSStatusBar, NSVariableStatusItemLength,
 from PyObjCTools import AppHelper
 
 from premium_fetch import fetch_premium
+from resources import load_sessions
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -32,15 +33,8 @@ class CryptoMasterSessionsApp(NSObject):
         self._http_session: requests.Session = requests.Session()
         self._fetch_generation = 0
 
-        # Session Configuration
-        self.sessions = [
-            {"id": "HKG", "mkt": "HKEX ", "type": "MAIN", "tz": "Asia/Hong_Kong", "open": 9, "close": 18, "icon": "🏮"},
-            {"id": "FRA", "mkt": "XETRA", "type": "MAIN", "tz": "Europe/Berlin", "open": 9, "close": 17.5, "icon": "🇩🇪"},
-            {"id": "LDN", "mkt": "LSE  ", "type": "MAIN", "tz": "Europe/London", "open": 8, "close": 16, "icon": "🔵"},
-            {"id": "NYC", "mkt": "NYSE ", "type": "PRE ", "tz": "America/New_York", "open": 4, "close": 9.5, "icon": "🌤️"},
-            {"id": "NYC", "mkt": "NYSE ", "type": "MAIN", "tz": "America/New_York", "open": 9.5, "close": 16, "icon": "🗽"},
-            {"id": "CHI", "mkt": "CME  ", "type": "CME ", "tz": "America/Chicago", "open": 17, "close": 16, "icon": "📊"} 
-        ]
+        self.sessions = load_sessions()
+
         return self
 
     def applicationDidFinishLaunching_(self, notification):
@@ -150,7 +144,7 @@ class CryptoMasterSessionsApp(NSObject):
                 now = datetime.now(tz)
                 curr_f = now.hour + now.minute / 60.0
                 
-                if s["icon"] == "📊": # CME Special Logic
+                if s.get("venue") == "cme":
                     is_cme_closed = (now.weekday() == 4 and now.hour >= 16) or \
                                     (now.weekday() == 5) or \
                                     (now.weekday() == 6 and now.hour < 17)
@@ -188,9 +182,8 @@ class CryptoMasterSessionsApp(NSObject):
                 
                 menu_title = f"{s['mkt']} {s['icon']} {now.strftime('%H:%M')} » {status_str}"
                 new_menu.addItem_(self.create_menu_item(menu_title, is_active=is_active))
-            except (KeyError, ValueError):
-                # Skip invalid session configuration
-                pass
+            except (KeyError, ValueError) as e:
+                logger.warning("Skipping invalid session row: %s", e)
 
         if show_gap_risk:
             new_menu.addItem_(NSMenuItem.separatorItem())

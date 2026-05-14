@@ -21,7 +21,7 @@ jobs:
           pip install -r requirements.txt -r requirements-dev.txt
 
       - name: Ruff
-        run: ruff check main.py premium_fetch.py tests/
+        run: ruff check main.py premium_fetch.py resources.py tests/
 
       - name: Pytest
         run: pytest tests/ -q
