@@ -75,7 +75,14 @@ If you encounter an "Operation not permitted" error during build, you need to gr
 
 ### 2. Build Command
 
-Execute the following command in the project root:
+From the project root, use the checked-in spec (bundles `data/` and sets bundle id):
+
+```bash
+pip install -r requirements-dev.txt
+pyinstaller TradingBar.spec
+```
+
+Alternatively, a minimal one-off build (you must add `--add-data` yourself if you rely on JSON under `data/`):
 
 ```bash
 pip install pyinstaller
@@ -94,6 +101,19 @@ After the build process completes:
 
 1. Navigate to the `dist/` folder
 2. Drag `TradingBar.app` to your `Applications` folder
+
+### 4. Code signing (optional)
+
+For distribution outside your own machine, Apple expects a **Developer ID** signature (and usually **notarization**). Typical flow (replace identity and paths):
+
+```bash
+codesign --deep --force --options runtime \
+  --sign "Developer ID Application: Your Name (TEAMID)" \
+  dist/TradingBar.app
+xcrun notarytool submit dist/TradingBar.zip --apple-id "..." --team-id "..." --password "..." --wait
+```
+
+Exact steps depend on your Apple Developer account; see Apple’s *Notarizing macOS software* documentation.
 
 ---
 
