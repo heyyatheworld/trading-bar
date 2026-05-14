@@ -28,6 +28,12 @@ The application uses the `zoneinfo` library (Python 3.9+ standard) for correct h
 
 > **Note:** The application automatically matches your Mac's system time with the configured exchange time zones, ensuring accurate display.
 
+### Simplified hours (not an official calendar)
+
+Opening times in `data/sessions.json` are **approximate regular hours** for the menu bar. They do **not** include exchange holidays, early closes, auction-only days, or venue-specific exceptions. Treat this as an at-a-glance guide, not compliance-grade market data.
+
+The **CME gap risk** banner uses your **Mac’s local clock** (weekend plus Monday morning through 10:00 local). It is a rough reminder, not tied to the exact Chicago reopen minute in your time zone.
+
 ---
 
 ## 🛠 Development & Running from Source
