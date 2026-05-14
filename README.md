@@ -10,6 +10,7 @@ A lightweight native macOS application that tracks global trading sessions direc
 * **Smart Tracking:** Automatically detects the current trading session (Hong Kong, Frankfurt/XETRA, London, NYSE pre/main, CME)
 * **CME Gap Alert:** Indicates volatility risks when markets open (weekends and Monday pre-open)
 * **BTC/ETH Premium:** Spot prices from Coinbase and premium vs Binance in the menu
+* **US CPI reminders:** Upcoming rows from `data/cpi_dates.json` (manual; verify against [BLS CPI schedule](https://www.bls.gov/schedule/news_release/cpi.htm))
 * **Low Resource Usage:** Built with Python using native macOS libraries (PyObjC)
 
 ---

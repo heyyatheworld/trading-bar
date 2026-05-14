@@ -1,0 +1,24 @@
+{
+  "releases": [
+    {
+      "date": "2026-05-13",
+      "label": "Apr 2026 CPI (example — verify vs BLS)"
+    },
+    {
+      "date": "2026-06-10",
+      "label": "May 2026 CPI (example — verify vs BLS)"
+    },
+    {
+      "date": "2026-07-15",
+      "label": "Jun 2026 CPI (example — verify vs BLS)"
+    },
+    {
+      "date": "2026-08-12",
+      "label": "Jul 2026 CPI (example — verify vs BLS)"
+    },
+    {
+      "date": "2026-09-16",
+      "label": "Aug 2026 CPI (example — verify vs BLS)"
+    }
+  ]
+}

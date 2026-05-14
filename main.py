@@ -12,7 +12,7 @@ from AppKit import (NSApplication, NSStatusBar, NSVariableStatusItemLength,
 from PyObjCTools import AppHelper
 
 from premium_fetch import fetch_premium
-from resources import load_sessions
+from resources import load_sessions, menu_lines_for_cpi_section
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -189,10 +189,12 @@ class CryptoMasterSessionsApp(NSObject):
             new_menu.addItem_(NSMenuItem.separatorItem())
             new_menu.addItem_(self.create_menu_item("⚠️ !!! CME GAP RISK ACTIVE !!! ⚠️", is_alert=True))
 
-        # Block after exchanges: CPI section (same structure as above)
+        # Block after exchanges: CPI section (dates from data/cpi_dates.json)
         new_menu.addItem_(NSMenuItem.separatorItem())
-        new_menu.addItem_(self.create_menu_item("📊 US CPI", is_active=False))
+        new_menu.addItem_(self.create_menu_item("📊 US CPI (ET calendar)", is_active=False))
         new_menu.addItem_(NSMenuItem.separatorItem())
+        for line in menu_lines_for_cpi_section():
+            new_menu.addItem_(self.create_menu_item(line, is_active=False))
 
         if len(active_codes) > self.last_active_count:
             NSSound.soundNamed_("Glass").play()

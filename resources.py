@@ -5,7 +5,9 @@ from __future__ import annotations
 import json
 import logging
 import sys
+from datetime import date, datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 logger = logging.getLogger(__name__)
 
@@ -90,3 +92,55 @@ def load_sessions() -> list[dict]:
     except (OSError, json.JSONDecodeError, ValueError) as e:
         logger.warning("Failed to load sessions.json, using defaults: %s", e)
         return list(DEFAULT_SESSIONS)
+
+
+def load_cpi_document() -> dict:
+    path = app_data_dir() / "cpi_dates.json"
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        if not isinstance(data, dict):
+            raise ValueError("cpi_dates.json must be a JSON object")
+        return data
+    except (OSError, json.JSONDecodeError, ValueError) as e:
+        logger.warning("Failed to load cpi_dates.json: %s", e)
+        return {"releases": []}
+
+
+def upcoming_cpi_lines(doc: dict, ref_date: date, limit: int = 4) -> list[str]:
+    """Human-readable lines for releases on or after ref_date (ISO calendar day)."""
+    releases = doc.get("releases", [])
+    if not isinstance(releases, list):
+        return []
+    lines: list[str] = []
+    try:
+        sorted_r = sorted(
+            (r for r in releases if isinstance(r, dict)),
+            key=lambda r: str(r.get("date", "")),
+        )
+    except (TypeError, ValueError):
+        return []
+    for r in sorted_r:
+        ds = r.get("date")
+        if not ds:
+            continue
+        try:
+            d = datetime.fromisoformat(str(ds)).date()
+        except ValueError:
+            continue
+        if d < ref_date:
+            continue
+        label = r.get("label") or str(ds)
+        lines.append(f"{label} — {ds} (ET calendar)")
+        if len(lines) >= limit:
+            break
+    return lines
+
+
+def menu_lines_for_cpi_section() -> list[str]:
+    ref = datetime.now(ZoneInfo("America/New_York")).date()
+    doc = load_cpi_document()
+    lines = upcoming_cpi_lines(doc, ref)
+    if not lines:
+        return ["No upcoming CPI rows — edit data/cpi_dates.json"]
+    return lines
