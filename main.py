@@ -11,46 +11,22 @@ from AppKit import (NSApplication, NSStatusBar, NSVariableStatusItemLength,
                     NSAttributedString, NSSound)
 from PyObjCTools import AppHelper
 
+from premium_fetch import fetch_premium
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Constants
-REQUEST_TIMEOUT = 5
 PREMIUM_ALERT_THRESHOLD_PCT = 0.1
 UI_UPDATE_INTERVAL_SEC = 60.0
 PROGRESS_BAR_WIDTH = 10
-
-COINBASE_TICKER = "https://api.exchange.coinbase.com/products/{pair}/ticker"
-BINANCE_TICKER = "https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
-
-
-def fetch_premium(
-    coin: str, session: requests.Session
-) -> tuple[float | None, float, float]:
-    """Fetch spot price from Coinbase and Binance; return (price_cb, premium_amount, premium_pct)."""
-    pair_cb = f"{coin}-USD"
-    symbol_bn = f"{coin}USDT"
-    try:
-        cb_res = session.get(COINBASE_TICKER.format(pair=pair_cb), timeout=REQUEST_TIMEOUT)
-        cb_res.raise_for_status()
-        price_cb = float(cb_res.json()["price"])
-
-        bn_res = session.get(BINANCE_TICKER.format(symbol=symbol_bn), timeout=REQUEST_TIMEOUT)
-        bn_res.raise_for_status()
-        price_bn = float(bn_res.json()["price"])
-
-        premium_amount = price_cb - price_bn
-        premium_pct = (premium_amount / price_bn) * 100
-        return price_cb, premium_amount, premium_pct
-    except (requests.RequestException, KeyError, ValueError) as e:
-        logger.debug("Premium fetch failed for %s: %s", coin, e)
-        return None, 0.0, 0.0
 
 
 class CryptoMasterSessionsApp(NSObject):
     def init(self):
         self = objc.super(CryptoMasterSessionsApp, self).init()
-        if self is None: return None
+        if self is None:
+            return None
         self.status_item = NSStatusBar.systemStatusBar().statusItemWithLength_(NSVariableStatusItemLength)
         self.last_active_count = 0
         self._http_session: requests.Session = requests.Session()
@@ -93,7 +69,8 @@ class CryptoMasterSessionsApp(NSObject):
             total = end - start
             prog_val = current - start
         
-        if total <= 0: return ""
+        if total <= 0:
+            return ""
         progress = int((prog_val / total) * width)
         progress = max(0, min(width, progress))
         return f"[{'▬' * progress}{' ' * (width - progress)}]"
@@ -107,7 +84,8 @@ class CryptoMasterSessionsApp(NSObject):
             diff = (1440 - current_total) + ((days_to_mon - 1) * 1440) + target_total
         else:
             diff = target_total - current_total
-            if diff < 0: diff += 1440
+            if diff < 0:
+                diff += 1440
         return diff
 
     @objc.python_method
@@ -191,8 +169,10 @@ class CryptoMasterSessionsApp(NSObject):
 
                 status_str = f"{status_lbl} {prog}" if is_active else f"{status_lbl} in {diff//60:02d}h {diff%60:02d}m"
                 
-                if is_active: active_codes.append(f"{s['icon']} {s['id']}")
-                else: upcoming.append((diff, s['id']))
+                if is_active:
+                    active_codes.append(f"{s['icon']} {s['id']}")
+                else:
+                    upcoming.append((diff, s['id']))
                 
                 menu_title = f"{s['mkt']} {s['icon']} {now.strftime('%H:%M')} » {status_str}"
                 new_menu.addItem_(self.create_menu_item(menu_title, is_active=is_active))

@@ -49,7 +49,9 @@ python3.12 -m venv .venv
 source .venv/bin/activate
 
 # Install dependencies
-pip install pyobjc requests
+pip install -r requirements.txt
+# Optional: tests and build
+pip install -r requirements-dev.txt
 ```
 
 ---
