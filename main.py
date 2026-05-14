@@ -30,6 +30,7 @@ class CryptoMasterSessionsApp(NSObject):
         self.status_item = NSStatusBar.systemStatusBar().statusItemWithLength_(NSVariableStatusItemLength)
         self.last_active_count = 0
         self._http_session: requests.Session = requests.Session()
+        self._fetch_generation = 0
 
         # Session Configuration
         self.sessions = [
@@ -49,15 +50,26 @@ class CryptoMasterSessionsApp(NSObject):
         )
         self.updateUI_(None)
 
-    def _fetch_premium_in_background(self) -> None:
-        """Fetch premium data in background, then update UI on main thread."""
+    def _fetch_premium_in_background(self, generation: int) -> None:
+        """Fetch premium data in background; refresh UI only if generation is still current."""
         try:
             btc = fetch_premium("BTC", self._http_session)
             eth = fetch_premium("ETH", self._http_session)
         except Exception as e:
             logger.warning("Premium fetch failed: %s", e)
             btc, eth = (None, 0.0, 0.0), (None, 0.0, 0.0)
-        AppHelper.callAfter(self._applyPremiumAndRefreshMenu_, btc, eth)
+        AppHelper.callAfter(self._apply_premium_if_current, generation, btc, eth)
+
+    @objc.python_method
+    def _apply_premium_if_current(self, generation: int, btc, eth) -> None:
+        if generation != self._fetch_generation:
+            logger.debug(
+                "Stale premium fetch ignored (gen %s, current %s)",
+                generation,
+                self._fetch_generation,
+            )
+            return
+        self._applyPremiumAndRefreshMenu_(btc, eth)
 
     @objc.python_method
     def get_progress_bar(self, current: float, start: float, end: float) -> str:
@@ -240,8 +252,12 @@ class CryptoMasterSessionsApp(NSObject):
     def updateUI_(self, _):
         # Build menu immediately without network (sessions only); UI stays responsive
         self._buildAndSetMenuWithPremium_(None, None)
-        # Fetch premium in background, then refresh menu on main thread
-        threading.Thread(target=self._fetch_premium_in_background, daemon=True).start()
+        self._fetch_generation += 1
+        gen = self._fetch_generation
+        threading.Thread(
+            target=lambda: self._fetch_premium_in_background(gen),
+            daemon=True,
+        ).start()
 
     @objc.typedSelector(b"v@:@")
     def dummyAction_(self, _): pass
